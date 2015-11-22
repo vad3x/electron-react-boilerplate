@@ -1,6 +1,6 @@
-@bgColor: #252A30;
-@headerColor: #565B61;
-@primaryTextColor: #CCCCCC;
+@bgColor: #252a30;
+@headerColor: #565b61;
+@primaryTextColor: #ccc;
 @secondaryTextColor: #424242;
 
 .waveformControl {
@@ -8,7 +8,8 @@
 
     position: relative;
 
-    width: 100%;
+    display: inline-block;
+
     height: 100pt;
 
     background: @headerColor;
@@ -32,4 +33,14 @@
 
         margin: auto;
     }
+}
+
+.needle {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: red;
+    left: 0;
 }

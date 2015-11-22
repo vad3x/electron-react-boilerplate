@@ -2,6 +2,8 @@ export const SET_AUDIO_CONTEXT = 'SET_AUDIO_CONTEXT';
 export const SELECT_FILE = 'SELECT_FILE';
 // export const FETCH_AUDIO_BUFFER = 'FETCH_AUDIO_BUFFER';
 export const ADD_AUDIO_BUFFER = 'ADD_AUDIO_BUFFER';
+export const NEEDLE_SEARCH = 'NEEDLE_SEARCH';
+export const SET_NEEDLE = 'SET_NEEDLE';
 
 export const PLAY = 'PLAY';
 export const STOP = 'STOP';
@@ -17,7 +19,7 @@ export function play() {
 
       audioSource1.connect(audioContext.destination);
 
-      audioSource1.start(audioContext.currentTime, 0);
+      audioSource1.start(0, analyzer.time);
 
       dispatch({
         type: PLAY,
@@ -30,7 +32,7 @@ export function play() {
 export function stop() {
   return (dispatch, getState) => {
     const { analyzer } = getState();
-    const { audioContext, audioBuffer, audioSource } = analyzer;
+    const { audioSource } = analyzer;
 
     if (audioSource) {
       audioSource.stop();
@@ -59,7 +61,7 @@ export function selectFile(dialog, window) {
         }]
       }, (fileNames) => {
         if (!fileNames) return;
-        
+
         const filePath = fileNames[0];
 
         dispatch({
@@ -69,7 +71,7 @@ export function selectFile(dialog, window) {
 
         dispatch(fetchAudioBuffer(filePath));
       });
-  }
+  };
 }
 
 export function fetchAudioBuffer(filePath) {
@@ -90,6 +92,30 @@ export function addAudioBuffer(audioBuffer) {
   return {
     type: ADD_AUDIO_BUFFER,
     audioBuffer
+  };
+}
+
+export function setNeedle(time) {
+  return {
+    type: SET_NEEDLE,
+    time
+  };
+}
+
+export function needleSearch(time) {
+  return (dispatch, getState) => {
+    const { analyzer } = getState();
+    const { audioSource } = analyzer;
+
+    if (audioSource) {
+      dispatch(stop());
+    }
+
+    dispatch(setNeedle(time));
+
+    if (audioSource) {
+      dispatch(play());
+    }
   };
 }
 

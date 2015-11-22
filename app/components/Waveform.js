@@ -4,7 +4,7 @@ import styles from './Waveform.module.less';
 
 export default class Waveform extends Component {
   static propTypes = {
-    channelData: React.PropTypes.array,
+    channelData: React.PropTypes.object,
     width: React.PropTypes.number,
     height: React.PropTypes.number
   }

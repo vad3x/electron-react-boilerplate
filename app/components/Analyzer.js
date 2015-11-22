@@ -10,13 +10,15 @@ class Analyzer extends Component {
     selectFile: PropTypes.func.isRequired,
     play: PropTypes.func.isRequired,
     stop: PropTypes.func.isRequired,
+    needleSearch: PropTypes.func.isRequired,
+    setNeedle: PropTypes.func.isRequired,
     dialog: PropTypes.object.isRequired,
     currentWindow: PropTypes.object.isRequired,
     analyzer: PropTypes.object.isRequired
   }
 
   render() {
-    const { selectFile, play, stop, dialog, currentWindow, analyzer } = this.props;
+    const { selectFile, play, stop, needleSearch, setNeedle, dialog, currentWindow, analyzer } = this.props;
 
     return (
       <div>
@@ -34,7 +36,11 @@ class Analyzer extends Component {
           <button className={styles.btn} onClick={stop}>Stop</button>
         </div>
         <WaveformControl
-          audioBuffer={analyzer.audioBuffer} />
+          audioContext={analyzer.audioContext}
+          audioSource={analyzer.audioSource}
+          audioBuffer={analyzer.audioBuffer}
+          setNeedle={setNeedle}
+          needleSearch={needleSearch} />
         <FrequencyMeter
           audioContext={analyzer.audioContext}
           audioSource={analyzer.audioSource} />
