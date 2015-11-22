@@ -3,6 +3,45 @@ export const SELECT_FILE = 'SELECT_FILE';
 // export const FETCH_AUDIO_BUFFER = 'FETCH_AUDIO_BUFFER';
 export const ADD_AUDIO_BUFFER = 'ADD_AUDIO_BUFFER';
 
+export const PLAY = 'PLAY';
+export const STOP = 'STOP';
+
+export function play() {
+  return (dispatch, getState) => {
+    const { analyzer } = getState();
+    const { audioContext, audioBuffer, audioSource } = analyzer;
+
+    if (!audioSource) {
+      const audioSource1 = audioContext.createBufferSource();
+      audioSource1.buffer = audioBuffer;
+
+      audioSource1.connect(audioContext.destination);
+
+      audioSource1.start(audioContext.currentTime, 0);
+
+      dispatch({
+        type: PLAY,
+        audioSource: audioSource1
+      });
+    }
+  };
+}
+
+export function stop() {
+  return (dispatch, getState) => {
+    const { analyzer } = getState();
+    const { audioContext, audioBuffer, audioSource } = analyzer;
+
+    if (audioSource) {
+      audioSource.stop();
+
+      dispatch({
+        type: STOP
+      });
+    }
+  };
+}
+
 export function setAudioContext(audioContext) {
   return {
     type: SET_AUDIO_CONTEXT,
@@ -19,6 +58,8 @@ export function selectFile(dialog, window) {
           extensions: ['mp3']
         }]
       }, (fileNames) => {
+        if (!fileNames) return;
+        
         const filePath = fileNames[0];
 
         dispatch({
@@ -39,7 +80,7 @@ export function fetchAudioBuffer(filePath) {
       const audioContext = getState().analyzer.audioContext;
 
       audioContext.decodeAudioData(toArrayBuffer(data), (audioBuffer) => {
-        dispatch(addAudioBuffer(audioBuffer, audioContext));
+        dispatch(addAudioBuffer(audioBuffer));
       });
     });
   };

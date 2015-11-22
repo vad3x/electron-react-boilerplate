@@ -31,6 +31,12 @@ config.module.loaders.push({
     'style-loader',
     'css-loader?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]!'
   ]
+}, {
+  test: /\.module\.less$/,
+  loaders: [
+    'style-loader',
+    'css-loader?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]!less'
+  ]
 });
 
 

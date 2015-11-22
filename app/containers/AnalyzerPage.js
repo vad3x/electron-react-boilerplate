@@ -10,8 +10,6 @@ function mapStateToProps(state) {
   return {
     dialog: remote.require('dialog'),
     currentWindow: remote.getCurrentWindow(),
-    audioContext: state.analyzer.audioContext,
-    filePath: state.analyzer.filePath,
     analyzer: state.analyzer
   };
 }

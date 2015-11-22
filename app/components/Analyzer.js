@@ -2,13 +2,21 @@ import React, { Component, PropTypes } from 'react';
 import { Link } from 'react-router';
 import styles from './Counter.module.css';
 
+import FrequencyMeter from './FrequencyMeter';
+import WaveformControl from './WaveformControl';
+
 class Analyzer extends Component {
   static propTypes = {
-    selectFile: PropTypes.func.isRequired
+    selectFile: PropTypes.func.isRequired,
+    play: PropTypes.func.isRequired,
+    stop: PropTypes.func.isRequired,
+    dialog: PropTypes.object.isRequired,
+    currentWindow: PropTypes.object.isRequired,
+    analyzer: PropTypes.object.isRequired
   }
 
   render() {
-    const { selectFile, filePath, dialog, currentWindow } = this.props;
+    const { selectFile, play, stop, dialog, currentWindow, analyzer } = this.props;
 
     return (
       <div>
@@ -18,11 +26,18 @@ class Analyzer extends Component {
           </Link>
         </div>
         <div className={`counter ${styles.counter}`}>
-          {filePath}
+          {analyzer.filePath}
         </div>
         <div className={styles.btnGroup}>
           <button className={styles.btn} onClick={() => selectFile(dialog, currentWindow)}>selectFile</button>
+          <button className={styles.btn} onClick={play}>Play</button>
+          <button className={styles.btn} onClick={stop}>Stop</button>
         </div>
+        <WaveformControl
+          audioBuffer={analyzer.audioBuffer} />
+        <FrequencyMeter
+          audioContext={analyzer.audioContext}
+          audioSource={analyzer.audioSource} />
       </div>
     );
   }

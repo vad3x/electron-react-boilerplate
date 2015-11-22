@@ -1,0 +1,35 @@
+@bgColor: #252A30;
+@headerColor: #565B61;
+@primaryTextColor: #CCCCCC;
+@secondaryTextColor: #424242;
+
+.waveformControl {
+    line-height: 100pt;
+
+    position: relative;
+
+    width: 100%;
+    height: 100pt;
+
+    background: @headerColor;
+    box-shadow: 0 0 15pt rgba(0, 0, 0, .3);
+
+    span {
+        display: block;
+
+        text-align: center;
+        vertical-align: middle;
+
+        color: @primaryTextColor;
+    }
+
+    .waveform {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+
+        margin: auto;
+    }
+}

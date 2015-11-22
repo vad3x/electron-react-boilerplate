@@ -1,47 +1,53 @@
 import React, { Component } from 'react';
+import styles from './WaveformControl.module.less';
 
-import Waveform from 'Waveform';
+import Waveform from './Waveform';
 
 export default class WaveformControl extends Component {
-    constructor(props) {
-        super(props);
+  static propTypes = {
+    audioBuffer: React.PropTypes.object,
+    width: React.PropTypes.number,
+    height: React.PropTypes.number
+  }
+
+  componentDidMount() {
+    const { audioBuffer } = this.props;
+
+    if (audioBuffer) {
+      const channelData = audioBuffer.getChannelData(0, 1, 1);
+
+      this._channelData = channelData;
+    }
+  }
+
+  componentWillUpdate(nextProps) {
+    const { audioBuffer } = this.props;
+
+    if (nextProps.audioBuffer !== audioBuffer) {
+      const channelData = nextProps.audioBuffer.getChannelData(0, 1, 1);
+
+      this._channelData = channelData;
+    }
+  }
+
+  render() {
+    const { width, height } = this.props;
+
+    let body;
+    if (this._channelData) {
+      body = <Waveform channelData={this._channelData} height={height} width={width} />;
+    } else {
+      body = <span>Nothing To Render</span>;
     }
 
-    componentDidMount() {
-        if (this.props.audioBuffer) {
-            const channelData = this.props
-                .audioBuffer
-                .getChannelData(0, 1, 1);
-
-            this._channelData = channelData;
-        }
-    }
-
-    componentWillUpdate(nextProps) {
-        if (nextProps.audioBuffer != this.props.audioBuffer) {
-            const channelData = nextProps.audioBuffer
-                .getChannelData(0, 1, 1);
-
-            this._channelData = channelData;
-        }
-    }
-
-    render() {
-        let body;
-        if (this._channelData) {
-            body = <Waveform channelData={this._channelData} height={this.props.height} width={this.props.width}></Waveform>;
-        } else {
-            body = <span>Nothing To Render</span>;
-        }
-
-        return (
-            <div className="waveform-control">
-                {body}
-            </div>
-        );
-    }
+    return (
+      <div className={styles.waveformControl}>
+        {body}
+      </div>
+    );
+  }
 }
 
 WaveformControl.defaultProps = {
-    audioBuffer: null
+  audioBuffer: null
 };

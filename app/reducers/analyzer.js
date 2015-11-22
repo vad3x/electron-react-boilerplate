@@ -1,10 +1,11 @@
-import { SET_AUDIO_CONTEXT, SELECT_FILE, ADD_AUDIO_BUFFER } from '../actions/analyzer';
+import { SET_AUDIO_CONTEXT, SELECT_FILE, ADD_AUDIO_BUFFER, PLAY, STOP } from '../actions/analyzer';
 
 const initialState = {
   audioContext: new AudioContext(),
   filePath: '',
-  audioBuffer: null
-}
+  audioBuffer: null,
+  audioSource: null
+};
 
 export default function analyzer(state = initialState, action) {
   switch (action.type) {
@@ -22,6 +23,16 @@ export default function analyzer(state = initialState, action) {
       return {
         ...state,
         audioBuffer: action.audioBuffer
+      }
+    case PLAY:
+      return {
+        ...state,
+        audioSource: action.audioSource
+      }
+    case STOP:
+      return {
+        ...state,
+        audioSource: null
       }
     default:
       return state;

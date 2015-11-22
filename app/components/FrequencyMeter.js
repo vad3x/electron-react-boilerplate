@@ -1,147 +1,143 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
+import styles from './FrequencyMeter.module.less';
 
 export default class FrequencyMeter extends Component {
-  constructor(props) {
-    super(props);
+  static propTypes = {
+    audioContext: React.PropTypes.object,
+    audioSource: React.PropTypes.object,
+    width: React.PropTypes.number,
+    height: React.PropTypes.number,
+    bandsCount: React.PropTypes.number,
+    latency: React.PropTypes.number,
+    fftSize: React.PropTypes.number
   }
 
   componentDidMount() {
+    const { audioSource } = this.props;
+
     this._frequencyNode = ReactDOM.findDOMNode(this.refs.frequency);
 
-    if (this.props.audioSource) {
+    if (audioSource) {
       this._initInternal();
     }
   }
 
   componentDidUpdate() {
-    if (this.props.audioSource) {
+    const { audioSource } = this.props;
+    if (audioSource) {
       this._initInternal();
     }
   }
 
   render() {
-      console.log('freq render');
-      // TODO fix
-      const width = this.props.width;
-      const height = this.props.height;
+    const { width, height } = this.props;
 
-      const min = 20;
-      const max = 23000;
+    const min = 20;
+    const max = 23000;
 
-      var minp = 0;
-      var maxp = width;
+    var minp = 0;
+    var maxp = width;
 
-      const minv = Math.log(min);
-      const maxv = Math.log(max);
+    const minv = Math.log(min);
+    const maxv = Math.log(max);
 
-      const scale = ((maxv - minv) / (maxp - minp));
+    const scale = ((maxv - minv) / (maxp - minp));
 
-      const freqToDraw = [
-          50, 100, 200, 500, 1000, 2000, 5000, 10000
-      ];
+    const freqToDraw = [50, 100, 200, 500, 1000, 2000, 5000, 10000];
 
-      const topMargin = 12;
-      const freqLines = [];
-      for (let i in freqToDraw) {
+    const topMargin = 12;
+    const freqLines = [];
+    for (const i in freqToDraw) {
 
-          const f = freqToDraw[i];
+      const f = freqToDraw[i];
 
-          const x = Math.ceil((Math.log(f) - minv) / scale + minp);
+      const x = Math.ceil((Math.log(f) - minv) / scale + minp);
 
-          const line = <line key={i} strokeWidth="1" x1={x} x2={x} y1={topMargin} y2={height}></line>;
-          freqLines.push(line);
-      }
+      const line = <line key={i} strokeWidth="1" x1={x} x2={x} y1={topMargin} y2={height}></line>;
+      freqLines.push(line);
+    }
 
-      const freqToTitle = [
-          40, 100, 200, 400, 600, 1000, 2000, 4000, 6000, 10000
-      ];
-      const freqTitles = [];
-      for (let i in freqToTitle) {
+    const freqToTitle = [40, 100, 200, 400, 600, 1000, 2000, 4000, 6000, 10000];
+    const freqTitles = [];
 
-          const f = freqToTitle[i];
+    for (const i in freqToTitle) {
 
-          const x = Math.ceil((Math.log(f) - minv) / scale + minp) - 10;
+      const f = freqToTitle[i];
 
-          const text = <text key={i} x={x} y={10}>{f < 1000 ? f : `${f / 1000}k` }</text>;
-          freqTitles.push(text);
-      }
+      const x = Math.ceil((Math.log(f) - minv) / scale + minp) - 10;
 
-      return (
-          <svg className="frequency-meter" height={this.props.height} width={this.props.width}>
-              {freqLines}
-              {freqTitles}
-              <path fill="transparent" ref="frequency"></path>
-          </svg>
-      );
+      const text = <text key={i} x={x} y={10}>{f < 1000 ? f : `${f / 1000}k`}</text>;
+      freqTitles.push(text);
+    }
+
+    return (
+      <svg className={styles.frequencyMeter} height={height} width={width}>
+        {freqLines}
+        {freqTitles}
+        <path fill="transparent" ref="frequency"></path>
+      </svg>
+    );
   }
 
   _initInternal() {
-      this._buffer = new Uint8Array(this.props.fftSize / 2);
+    const { audioContext, audioSource, latency, fftSize, width, height } = this.props;
+    this._buffer = new Uint8Array(this.props.fftSize / 2);
 
-      const audioAnalyser = this.props
-          .audioContext
-          .createAnalyser();
+    const audioAnalyser = audioContext.createAnalyser();
 
-      audioAnalyser.fftSize = this.props.fftSize;
-      audioAnalyser.minDecibels = -90;
-      audioAnalyser.maxDecibels = -10;
-      audioAnalyser.smoothingTimeConstant = 0.9;
+    audioAnalyser.fftSize = fftSize;
+    audioAnalyser.minDecibels = -90;
+    audioAnalyser.maxDecibels = -10;
+    audioAnalyser.smoothingTimeConstant = 0.9;
 
-      this.props
-          .audioSource
-          .connect(audioAnalyser);
+    audioSource.connect(audioAnalyser);
 
-      const width = this.props.width;
-      const height = this.props.height;
+    this._frequencyNode.pathSegList.clear();
+    const playingInterval = setInterval(() => this._renderFrame(audioAnalyser, width, height), latency);
 
-      this._frequencyNode
-          .pathSegList
-          .clear();
-      const playingInterval = setInterval(() => this._renderFrame(audioAnalyser, width, height), this.props.latency);
-
-      this.props.audioSource.onended = function() {
-          clearInterval(playingInterval);
-      };
+    audioSource.onended = () => {
+      clearInterval(playingInterval);
+    };
   }
 
   _drawFrequency(min, max, width, height, data, node) {
-      var minp = 0;
-      var maxp = width;
+    var minp = 0;
+    var maxp = width;
 
-      const segments = node.pathSegList;
-      if (!segments.length) {
-          const newSegment = node.createSVGPathSegMovetoAbs(0, height);
-          segments.appendItem(newSegment);
+    const segments = node.pathSegList;
+    if (!segments.length) {
+      const newSegment = node.createSVGPathSegMovetoAbs(0, height);
+      segments.appendItem(newSegment);
 
-          for (let i = 1; i < data.length; i++) {
-              const newSegment = node.createSVGPathSegLinetoAbs(10, 20);
-              segments.appendItem(newSegment);
-          }
+      for (let i = 1; i < data.length; i++) {
+        const newSegment1 = node.createSVGPathSegLinetoAbs(10, 20);
+        segments.appendItem(newSegment1);
+      }
+    }
+
+    const minv = Math.log(min);
+    const maxv = Math.log(max);
+
+    const scale = ((maxv - minv) / (maxp - minp));
+
+    for (let i = 0; i < data.length; i++) {
+      const value = data[i];
+
+      let x = (Math.log(i) - minv) / scale + minp;
+
+      if (!i) {
+        x = 0;
       }
 
-      const minv = Math.log(min);
-      const maxv = Math.log(max);
+      const h = (height * value) / 256;
+      const y = height - h;
 
-      const scale = ((maxv - minv) / (maxp - minp));
+      const point = segments.getItem(i);
 
-      for (let i = 0; i < data.length; i++) {
-          let value = data[i];
-
-          let x = (Math.log(i) - minv) / scale + minp;
-
-          if (!i) {
-              x = 0;
-          }
-
-          const h = (height * value) / 256;
-          const y = height - h;
-
-          const point = segments.getItem(i);
-
-          point.x = x;
-          point.y = y;
-      }
+      point.x = x;
+      point.y = y;
+    }
   }
 
   _renderFrame(analyser, width, height) {
