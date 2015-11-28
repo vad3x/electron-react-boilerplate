@@ -40,7 +40,8 @@ class Analyzer extends Component {
           audioSource={analyzer.audioSource}
           audioBuffer={analyzer.audioBuffer}
           setNeedle={setNeedle}
-          needleSearch={needleSearch} />
+          needleSearch={needleSearch}
+          time={analyzer.time} />
         <FrequencyMeter
           audioContext={analyzer.audioContext}
           audioSource={analyzer.audioSource} />

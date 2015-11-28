@@ -13,7 +13,8 @@ export default class WaveformControl extends Component {
     width: React.PropTypes.number,
     height: React.PropTypes.number,
     latency: React.PropTypes.number,
-    needleSearch: React.PropTypes.func.isRequired
+    needleSearch: React.PropTypes.func.isRequired,
+    time: React.PropTypes.number
   }
 
   constructor(props) {
@@ -21,7 +22,8 @@ export default class WaveformControl extends Component {
 
     this.state = {
       timeOffset: 0,
-      needleTime: 0
+      needleTime: 0,
+      currentTime: 0
     };
   }
 
@@ -51,25 +53,29 @@ export default class WaveformControl extends Component {
   }
 
   componentDidUpdate() {
-    const { audioContext, audioSource, audioBuffer, latency } = this.props;
+    const { audioContext, audioSource, audioBuffer, needleSearch, time, latency } = this.props;
 
     const node = ReactDOM.findDOMNode(this);
     this._needleNode = ReactDOM.findDOMNode(this.refs.needle);
 
     if (this._playingInterval) {
       clearInterval(this._playingInterval);
+      this._playingInterval = null;
+
+      needleSearch(this.state.currentTime);
     }
 
     if (audioSource) {
       this.state.timeOffset = audioContext.currentTime;
-      this._playingInterval = setInterval(() => this._moveNeedle(node, audioContext, audioBuffer.duration), latency);
+      this._playingInterval = setInterval(() => this._moveNeedle(node, audioContext, audioBuffer.duration, time), latency);
     }
   }
 
-  _moveNeedle(node, audioContext, duration) {
+  _moveNeedle(node, audioContext, duration, needleTime) {
     const clientWidth = node.clientWidth;
 
-    const v = (audioContext.currentTime - this.state.timeOffset + this.state.needleTime) / duration;
+    const t = this.state.currentTime = (audioContext.currentTime - this.state.timeOffset) + needleTime;
+    const v = t / duration;
     const offset = v * clientWidth;
 
     this._needleNode.style.left = offset + 'px';
@@ -81,8 +87,6 @@ export default class WaveformControl extends Component {
 
     const v = mouseOffset / clientWidth;
     const time = v * duration;
-
-    this.state.needleTime = time;
 
     this._needleNode.style.left = mouseOffset + 'px';
 
